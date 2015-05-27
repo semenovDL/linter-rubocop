@@ -1,14 +1,19 @@
 {
   "name": "linter-rubocop",
-  "linter-package": true,
-  "activationCommands": [],
-  "main": "./lib/init",
-  "version": "0.2.7",
+  "main": "./lib/linter-rubocop",
+  "version": "2.0.0",
   "description": "Lint `Ruby` on the fly, using rubocop",
-  "repository": "https://github.com/AtomLinter/linter-rubocop",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "repository": "https://github.com/steelbrain/atom-hack",
+  "providedServices": {
+    "linter-plus": {
+      "versions": {
+        "0.1.0": "provideLinter"
+      }
+    }
+  }
 }

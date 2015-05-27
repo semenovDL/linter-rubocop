@@ -1,34 +1,41 @@
-linterPath = atom.packages.getLoadedPackage("linter").path
-Linter = require "#{linterPath}/lib/linter"
-findFile = require "#{linterPath}/lib/util"
+module.exports = LinterRubocop =
+  scopes: ['source.ruby', 'source.ruby.rails', 'source.ruby.rspec']
 
-class LinterRubocop extends Linter
-  # The syntax that the linter handles. May be a string or
-  # list/tuple of strings. Names should be all lowercase.
-  @syntax: ['source.ruby', 'source.ruby.rails', 'source.ruby.rspec']
+  activate: ->
+    console.log 'activate rubocop'
+    unless atom.packages.getLoadedPackages 'linter-plus'
+      @showError '[Linter+ rubocop] `linter-plus` package not found, please install it'
 
-  # A string, list, tuple or callable that returns a string, list or tuple,
-  # containing the command line (with arguments) used to lint.
-  cmd: 'rubocop --force-exclusion --format emacs'
+  showError: (message = '') ->
+    atom.notifications.addError message
 
-  linterName: 'rubocop'
+  provideLinter: ->
+    console.log 'xxx'
+    {
+      scopes: @scopes
+      lint: @lint
+      lintOnFly: true
+    }
 
-  # A regex pattern used to extract information from the executable's output.
-  regex:
-    '.+?:(?<line>\\d+):(?<col>\\d+): ' +
-    '((?<warning>[RCW])|(?<error>[EF])): ' +
-    '(?<message>.+)'
+  lint: (TextEditor, TextBuffer, {Error}) ->
+    CP = require 'child_process'
+    Path = require 'path'
 
-  options: ['executablePath']
-
-  constructor: (editor)->
-    super(editor)
-
-    if editor.getGrammar().scopeName == 'source.ruby.rails'
-      @cmd += " --rails"
-
-    config = findFile(@cwd, '.rubocop.yml')
-    if config
-      @cmd += " --config #{config}"
-
-module.exports = LinterRubocop
+    return new Promise (Resolve)->
+      console.log 'lint2' # I get this lint2 in my console
+      FilePath = TextEditor.getPath()
+      return unless FilePath # Files that have not be saved
+      Data = []
+      Process = CP.exec('rubocop --format json', {cwd: Path.dirname(FilePath)})
+      Process.stdout.on 'data', (data)-> Data.push(data.toString())
+      Process.on 'close', ->
+        try
+          Content = JSON.parse(Data.join(''))
+        catch error then return # Ignore weird errors for now
+        ToReturn = []
+        return ToReturn if Content.passed
+        Content.files.forEach (file)->
+          console.log file
+          file.offenses.forEach (offense)->
+            ToReturn.push new Error offense.message, file.path, [[offense.line, offense.column],[offense.line, offense.column+offense.length]], []
+        ToReturn
