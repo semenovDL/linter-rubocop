@@ -4,6 +4,7 @@ helpers = require 'atom-linter'
 COMMAND_CONFIG_KEY = 'linter-rubocop.command'
 OLD_EXEC_PATH_CONFIG_KEY = 'linter-rubocop.executablePath'
 OLD_ARGS_CONFIG_KEY = 'linter-rubocop.additionalArguments'
+ADDITIONAL_GRAMMAR_SCOPES = 'linter-rubocop.additionalGrammarScopes'
 DEFAULT_LOCATION = {line: 1, column: 1, length: 0}
 DEFAULT_ARGS = ['--cache', 'false', '--force-exclusion', '-f', 'json', '-s']
 DEFAULT_MESSAGE = 'Unknown Error'
@@ -44,7 +45,7 @@ linter =
     'source.ruby.rails'
     'source.ruby.rspec'
     'source.ruby.chef'
-  ]
+  ].concat(atom.config.get(ADDITIONAL_GRAMMAR_SCOPES))
   scope: 'file'
   lintOnFly: true
   lint: lint
