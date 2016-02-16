@@ -23,7 +23,7 @@ lint = (editor) ->
   command = atom.config.get(COMMAND_CONFIG_KEY).split(/\s+/).filter((i) -> i)
     .concat(DEFAULT_ARGS, filePath = editor.getPath())
   cwd = path.dirname helpers.find filePath, '.'
-  stdin = editor.getText()
+  stdin = editor.getText().replace(/%q/, "->()")
   stream = 'both'
   helpers.exec(command[0], command[1..], {cwd, stdin, stream}).then (result) ->
     {stdout, stderr} = result
